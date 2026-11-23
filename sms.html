@@ -47,6 +47,24 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #b88c
 @media(min-width:680px){.page{padding-left:35px;padding-right:35px}.topbar{min-height:160px}.space{height:190px}.inputbox{min-height:83px}.fields{gap:17px}.two{gap:17px}.disclosure{margin-top:34px;font-size:19px}.accept{font-size:20px}.submit{min-height:75px}.bottom{padding-bottom:50px}}
 @media(max-height:720px){.topbar{min-height:94px;padding-top:27px}.space{height:38px}.gap{min-height:32px}.inputbox{min-height:57px}.disclosure{margin-top:21px}}
 @media(max-width:350px){.inputbox{gap:10px;padding-left:12px;padding-right:12px}.two{gap:7px}.two .inputbox{gap:9px}.topbar h1{font-size:16px}.rightnav{gap:11px}}
+
+/* 문자 앱 연결 확인 및 대체 전송 창 */
+.overlay{position:fixed;inset:0;background:#32251d99;z-index:30;display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.dialog{width:min(100%,490px);max-height:90svh;overflow-y:auto;background:var(--bg);border-radius:17px;padding:22px 20px;box-shadow:0 18px 60px #38272046}
+.dialog h2{font-size:21px;color:var(--ink);margin:0 0 10px}
+.dialog p{font-size:13px;line-height:1.6;margin:7px 0 15px}
+.dialog label{font-size:13px;font-weight:750;display:block;margin:13px 0 7px}
+.dialog input,.dialog textarea{display:block;width:100%;border:1.3px solid var(--stroke);background:white;border-radius:8px;padding:12px;font-size:14px;color:var(--ink)}
+.dialog textarea{min-height:150px;line-height:1.6;resize:vertical}
+.dialog .hint{font-size:12px;color:#74655a}
+.dialog .buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.dialog button,.dialog a.sendlink{display:flex;align-items:center;justify-content:center;min-height:46px;border:0;border-radius:9px;font-size:14px;font-weight:800;text-align:center;padding:10px}
+.dialog button.copy{background:#eee4dc;color:#4d3527}
+.dialog a.sendlink{background:#a97956;color:#fff}
+.dialog button.close{background:transparent;border:1px solid var(--stroke);color:#5f514a;grid-column:1/-1}
+.dialog .warning{background:#fff1dc;padding:11px 12px;border-radius:9px;color:#7a4c23;font-size:12px;line-height:1.55}
+.dialog .status{min-height:18px;font-size:12px;color:#286a58;margin-top:9px}
 </style>
 </head>
 <body>
@@ -84,7 +102,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #b88c
       </div>
       <div class="inputbox">
         <label for="mbti">MBTI</label>
-        <input id="mbti" type="text" maxlength="4" inputmode="text" autocapitalize="characters" spellcheck="false" placeholder="ENFP" required>
+        <input id="mbti" type="text" maxlength="5" inputmode="text" autocapitalize="characters" spellcheck="false" placeholder="ENFP" required>
       </div>
     </div>
   </div>
@@ -94,41 +112,101 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #b88c
   <div class="bottom">
     <p class="err" id="error" role="alert"></p>
     <button class="submit" id="send" type="submit" disabled>예약 문자 보내기</button>
-    <p class="small">문자 앱이 열리면 받는 사람을 지정하고 직접 전송해 주세요.</p>
+    <p class="small">문자는 자동으로 발송되지 않습니다. 다음 화면에서 내용을 확인하고 문자 앱에서 전송하세요.</p>
   </div>
 </form>
+</div>
+
+<div class="overlay" id="previewLayer" role="dialog" aria-modal="true" aria-labelledby="previewHeading">
+  <div class="dialog">
+    <h2 id="previewHeading">문자 내용 확인</h2>
+    <p>작성한 예약 문의를 <strong>누구에게 보낼지</strong> 지정한 뒤 문자 앱을 여세요.</p>
+    <label for="targetPhone">문자 받는 사람 번호 (운영자 번호)</label>
+    <input id="targetPhone" type="tel" inputmode="tel" maxlength="20" placeholder="010-0000-0000">
+    <p class="hint">위 신청서의 '연락처'는 신청자 번호입니다. 이 칸에는 <strong>문자를 받을 운영자의 번호</strong>를 입력하세요.</p>
+    <label for="previewMessage">보낼 문자 내용</label>
+    <textarea id="previewMessage" readonly aria-label="작성된 문자 내용"></textarea>
+    <div class="warning" id="smsTip">수신자 번호를 입력하면 문자 앱에 번호와 내용을 함께 전달할 수 있습니다. 번호를 모른다면 내용 복사 후 문자 앱에서 직접 붙여넣으세요.</div>
+    <div class="buttons">
+      <button type="button" class="copy" id="copyMessage">📋 내용 복사</button>
+      <a href="sms:" id="smsLink" class="sendlink">✉️ 문자 앱 열기</a>
+      <button type="button" class="close" id="closePreview">닫기</button>
+    </div>
+    <div class="status" id="copyStatus" role="status" aria-live="polite"></div>
+    <p class="hint">네이버 앱 안에서 열리지 않으면 오른쪽 메뉴에서 '기본 브라우저로 열기'를 선택하고 다시 시도하세요. 문자 앱이 열려도 <strong>보내기</strong>를 눌러야 실제 발송됩니다.</p>
+  </div>
 </div>
 <script>
 (function(){
 "use strict";
 const $=id=>document.getElementById(id);
+const form=$("reservationForm"),btn=$("send"),layer=$("previewLayer"),link=$("smsLink"),receiver=$("targetPhone"),tip=$("smsTip"),status=$("copyStatus");
 const ids=["name","phone","age","mbti"];
-const form=$("reservationForm"),btn=$("send");
-function data(){
-  return {name:$("name").value.trim(),phone:$("phone").value.replace(/[^0-9+]/g,""),age:$("age").value.trim(),mbti:$("mbti").value.trim().toUpperCase()};
-}
+function data(){return {name:$("name").value.trim(),phone:$("phone").value.replace(/[^0-9+]/g,""),age:$("age").value.trim(),mbti:$("mbti").value.trim().toUpperCase()}}
 function complete(){
-  const x=data();
-  return !!x.name && /^(?:0\d{8,10}|\+82\d{9,10})$/.test(x.phone) && Number.isInteger(Number(x.age)) && +x.age>=1 && +x.age<=120 && /^[EI][SN][TF][JP]$/.test(x.mbti) && $("consent").checked;
+ const x=data();
+ return !!x.name && !!x.phone && !!x.age && !!x.mbti && $("consent").checked;
 }
 function update(){
-  $("mbti").value=$("mbti").value.toUpperCase();
-  btn.disabled=!complete();
-  $("error").textContent="";
+ $("mbti").value=$("mbti").value.toUpperCase();
+ btn.disabled=!complete();$("error").textContent="";
 }
 ids.forEach(id=>$(id).addEventListener("input",update));
 $("consent").addEventListener("change",update);
 $("phone").addEventListener("blur",function(){
-  const v=this.value.replace(/\D/g,"");
-  if(v.length===11 && v.startsWith("010"))this.value=v.replace(/(\d{3})(\d{4})(\d{4})/,"$1-$2-$3");
+ const v=this.value.replace(/\D/g,"");
+ if(v.length===11&&v.startsWith("010"))this.value=v.replace(/(\d{3})(\d{4})(\d{4})/,"$1-$2-$3");
 });
+function message(){
+ const x=data();
+ return "안녕하세요. 예약 문의드립니다.\n\n이름: "+x.name+"\n연락처: "+x.phone+"\n나이: "+x.age+"\nMBTI: "+x.mbti;
+}
+function updateLink(){
+ const num=receiver.value.replace(/[\s()-]/g,"");
+ const valid=/^(?:0\d{8,10}|\+82\d{9,10})$/.test(num);
+ const text=$("previewMessage").value;
+ // Android 기본 문자 앱용. 수신자가 없으면 빈 문자 작성 창만 엽니다.
+ link.href=valid?("sms:"+num+"?body="+encodeURIComponent(text)):"sms:";
+ tip.textContent=valid
+ ? "문자 앱이 열리면 수신번호와 내용을 확인하고 '보내기'를 눌러주세요. 일부 앱은 본문을 자동으로 채우지 않을 수 있으니 복사 기능을 이용할 수 있습니다."
+ : "문자 받을 운영자 번호가 없으면 앱에서 자동으로 수신자를 지정할 수 없습니다. '내용 복사'를 먼저 누르고, 문자 앱에서 수신자를 입력한 뒤 붙여넣으세요.";
+ return valid;
+}
+receiver.addEventListener("input",updateLink);
+function close(){layer.classList.remove("open");btn.focus()}
+$("closePreview").addEventListener("click",close);
+layer.addEventListener("click",e=>{if(e.target===layer)close()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&layer.classList.contains("open"))close()});
 form.addEventListener("submit",function(e){
-  e.preventDefault();
-  if(!complete()){btn.disabled=true;$("error").textContent="정보를 모두 입력하고 개인정보 동의에 체크해 주세요.";return}
-  const x=data();
-  const message="안녕하세요. 예약 문의드립니다.\n\n이름: "+x.name+"\n연락처: "+x.phone+"\n나이: "+x.age+"\nMBTI: "+x.mbti;
-  const uri="sms:?body="+encodeURIComponent(message);
-  window.location.href=uri;
+ e.preventDefault();
+ const x=data();
+ if(!complete()){$("error").textContent="모든 정보를 입력하고 개인정보 동의에 체크해 주세요.";return}
+ if(!/^(?:0\d{8,10}|\+82\d{9,10})$/.test(x.phone)){$("error").textContent="연락처 번호를 확인해 주세요.";return}
+ if(!Number.isInteger(Number(x.age))||Number(x.age)<1||Number(x.age)>120){$("error").textContent="나이를 확인해 주세요.";return}
+ $("previewMessage").value=message();
+ receiver.value="";
+ status.textContent="";
+ updateLink();
+ layer.classList.add("open");
+ receiver.focus();
+});
+async function copyMessage(){
+ const txt=$("previewMessage").value;
+ try{
+   if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(txt)}
+   else throw Error("Fallback");
+   status.textContent="문자 내용을 복사했습니다. 문자 앱에 붙여넣으세요.";
+ }catch(e){
+   const t=document.createElement("textarea");t.value=txt;t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.select();
+   let ok=false;try{ok=document.execCommand("copy")}catch(_){}
+   t.remove();
+   status.textContent=ok?"문자 내용을 복사했습니다. 문자 앱에 붙여넣으세요.":"복사가 제한되었습니다. 위 문자 내용을 길게 눌러 복사하세요.";
+ }
+}
+$("copyMessage").addEventListener("click",copyMessage);
+link.addEventListener("click",()=>{
+ if(!updateLink())status.textContent="수신번호 없이 앱을 엽니다. 운영자 번호를 입력하고 복사한 내용을 붙여넣으세요.";
+ else status.textContent="문자 앱에서 실제 전송을 완료해 주세요.";
 });
 update();
 })();
