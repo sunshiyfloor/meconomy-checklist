@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#faf7f3">
+<meta name="theme-color" content="#3c89d5">
 <meta name="description" content="MECONOMY 예약 문의 문자 작성">
 <title>RESERVATION | MECONOMY</title>
 <style>
@@ -55,6 +55,19 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #b88c
 .help-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:9px;margin-top:10px}
 .help-actions a,.help-actions button{background:none;border:1px solid var(--stroke);border-radius:9px;padding:9px 11px;font-size:12px;color:#745d4b;min-height:39px;cursor:pointer;text-decoration:none}
 .help-note{font-size:12px;color:#8a7060;line-height:1.6;margin-top:11px;text-align:center}
+
+/* 사용자 지정 푸른 하늘 배경 */
+:root{--bg:#3c89d5;--ink:#16304d;--muted:#26415e;--stroke:#a2c6e8;--accent:#ffffff;--button-disabled:#b2c6d9;--button-active:#165e9e}
+html,body{background:#3c89d5}
+.page{background-image:linear-gradient(rgba(236,246,255,.12),rgba(236,246,255,.25)),url("data:image/webp;base64,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");background-position:center,center;background-size:cover,cover;background-repeat:no-repeat,no-repeat}
+.topbar h1,.topbar .iconbtn{color:#ffffff;text-shadow:0 1px 4px #153c793b}
+.inputbox{background:rgba(255,255,255,.84);border-color:rgba(222,235,253,.90);backdrop-filter:blur(2px)}
+.disclosure{background:rgba(255,255,255,.80);padding:14px 16px;border-radius:12px;color:#17334e}
+.accept{background:rgba(255,255,255,.76);padding:11px 13px;border-radius:10px;color:#17334e}
+.submit:not(.is-disabled){background:#165e9e}
+.help-note{background:rgba(255,255,255,.72);padding:9px 11px;border-radius:10px;color:#224360}
+.help-actions a,.help-actions button{background:rgba(255,255,255,.8);color:#1b466d;border-color:#adc9e7}
+.err{color:#8b1223;background:rgba(255,255,255,.76);border-radius:7px}
 </style>
 </head>
 <body>
