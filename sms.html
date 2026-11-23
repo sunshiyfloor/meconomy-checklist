@@ -74,16 +74,16 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #b88c
   </div>
 </header>
 
-<form class="form" id="reservationForm" novalidate>
+<form class="form" id="reservationForm" autocomplete="off" novalidate>
   <div class="space" aria-hidden="true"></div>
   <div class="fields">
     <div class="inputbox">
       <label for="name">이름</label>
-      <input id="name" type="text" maxlength="30" placeholder="홍길동" autocomplete="name" required>
+      <input id="name" type="text" maxlength="30" placeholder="홍길동" autocomplete="off" required>
     </div>
     <div class="inputbox phone">
       <label for="phone">연락처</label>
-      <input id="phone" type="tel" inputmode="tel" maxlength="15" placeholder="010-0000-0000" autocomplete="tel" required>
+      <input id="phone" type="tel" inputmode="tel" maxlength="15" placeholder="010-0000-0000" autocomplete="off" required>
     </div>
     <div class="two">
       <div class="inputbox">
@@ -173,7 +173,17 @@ $("copyText").addEventListener("click",async function(){
  let ok=false;try{ok=document.execCommand("copy")}catch(e){}
  t.remove();$("error").textContent=ok?"문자 내용이 복사되었습니다. 문자 앱에 붙여넣으세요.":"자동 복사가 안 됩니다. 브라우저에서 텍스트를 직접 복사해 주세요.";
 });
-update();
+function clearForm(){
+ for (const id of inputs) $(id).value="";
+ $("consent").checked=false;
+ $("error").textContent="";
+ update();
+}
+clearForm();
+// Reloading also clears autofilled/restored values in supporting browsers.
+window.addEventListener("pageshow",function(event){
+ if(!event.persisted) clearForm();
+});
 })();
 </script>
 </body>
