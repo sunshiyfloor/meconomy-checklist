@@ -107,7 +107,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #b88c
       <a id="chromeIntent" href="intent://#Intent;scheme=smsto;action=android.intent.action.SENDTO;end">Chrome용 열기</a>
       <button id="copyText" type="button">문자 내용 복사</button>
     </div>
-    <p class="help-note">문자 앱이 안 열리면 이 페이지를 <strong>Chrome 또는 삼성 인터넷</strong>에서 직접 열어 시도해 주세요. 문자 앱에서 전송 버튼을 눌러야 실제 발송됩니다.</p>
+    <p class="help-note">입력한 <strong>연락처가 받는 사람 번호</strong>로, 예약 안내문이 문자 내용으로 채워집니다. 문자 앱에서 <strong>보내기 버튼</strong>을 눌러야 실제 발송됩니다. 앱이 안 열리면 Chrome 또는 삼성 인터넷에서 시도해 주세요.</p>
   </div>
 </form>
 </div>
@@ -134,11 +134,12 @@ function update(){
  $("mbti").value=$("mbti").value.toUpperCase();
  const valid=isValid();
  const message=valid?getMessage():"";
- // 사용자 클릭으로 기본 문자 앱을 바로 요청합니다. 번호는 신청자 번호이므로 수신자로 쓰지 않습니다.
+ // 입력한 연락처를 수신 번호로 지정하고 예약 안내문을 본문에 채웁니다.
+ const phone=getData().phone;
  const encoded=encodeURIComponent(message);
- btn.href=valid?("sms:?body="+encoded):"sms:";
- alt.href=valid?("smsto:?body="+encoded):"smsto:";
- intent.href=valid?("intent://#Intent;scheme=smsto;action=android.intent.action.SENDTO;S.sms_body="+encoded+";end"):"intent://#Intent;scheme=smsto;action=android.intent.action.SENDTO;end";
+ btn.href=valid?("sms:"+phone+"?body="+encoded):"sms:";
+ alt.href=valid?("smsto:"+phone+"?body="+encoded):"smsto:";
+ intent.href=valid?("intent://"+phone+"#Intent;scheme=smsto;action=android.intent.action.SENDTO;S.sms_body="+encoded+";end"):"intent://#Intent;scheme=smsto;action=android.intent.action.SENDTO;end";
  btn.classList.toggle("is-disabled",!valid);
  btn.setAttribute("aria-disabled",String(!valid));
  $("error").textContent="";
