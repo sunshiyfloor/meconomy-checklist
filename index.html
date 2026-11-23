@@ -43,9 +43,9 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-vis
     <div class="intro"><span>내년 상반기 사업 구상을 위한 리서치 조사입니다.</span><span class="brand">✳ make_it</span></div>
     <section class="profile" aria-label="응답자 정보">
       <div class="formgrid">
-        <div class="field"><label for="name">이름</label><input id="name" maxlength="30" autocomplete="name" placeholder="이름 입력"></div>
-        <div class="field"><label for="age">나이</label><input id="age" type="number" min="1" max="120" inputmode="numeric" placeholder="나이"></div>
-        <div class="field"><label for="mbti">MBTI</label><select id="mbti"><option value="">선택해 주세요</option><option>ISTJ</option><option>ISFJ</option><option>INFJ</option><option>INTJ</option><option>ISTP</option><option>ISFP</option><option>INFP</option><option>INTP</option><option>ESTP</option><option>ESFP</option><option>ENFP</option><option>ENTP</option><option>ESTJ</option><option>ESFJ</option><option>ENFJ</option><option>ENTJ</option><option>모름</option></select></div>
+        <div class="field"><label for="name">이름</label><input id="name" maxlength="30" autocomplete="off" placeholder="이름 입력"></div>
+        <div class="field"><label for="age">나이</label><input id="age" autocomplete="off" type="number" min="1" max="120" inputmode="numeric" placeholder="나이"></div>
+        <div class="field"><label for="mbti">MBTI</label><select id="mbti" autocomplete="off"><option value="">선택해 주세요</option><option>ISTJ</option><option>ISFJ</option><option>INFJ</option><option>INTJ</option><option>ISTP</option><option>ISFP</option><option>INFP</option><option>INTP</option><option>ESTP</option><option>ESFP</option><option>ENFP</option><option>ENTP</option><option>ESTJ</option><option>ESFJ</option><option>ENFJ</option><option>ENTJ</option><option>모름</option></select></div>
       </div>
     </section>
     <section class="progress-card" aria-live="polite">
@@ -67,10 +67,10 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-vis
         <label class="choice"><input type="checkbox" data-level="9"><span class="check"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span><span class="lvl">Lv.9</span><span class="choice-text">놀이공원 가서 혼자 놀기</span></label>
       </div>
     </section>
-    <section class="other"><label class="none-row"><input id="none" type="checkbox"><span>아직 해본 게 없어요</span></label><label for="custom" class="other-label">나만의 혼놀 경험이 있다면?</label><textarea id="custom" maxlength="350" placeholder="예: 혼자 전시회 가기, 혼자 맛집 투어하기"></textarea></section>
+    <section class="other"><label class="none-row"><input id="none" type="checkbox"><span>아직 해본 게 없어요</span></label><label for="custom" class="other-label">나만의 혼놀 경험이 있다면?</label><textarea id="custom" autocomplete="off" maxlength="350" placeholder="예: 혼자 전시회 가기, 혼자 맛집 투어하기"></textarea></section>
     <div class="actions"><button class="btn primary" id="viewBtn">✨ 내 결과 확인하기</button><button class="btn secondary" id="saveBtn">📷 결과 이미지 저장</button><button class="btn secondary" id="shareBtn">↗ 결과 공유하기</button></div>
     <div style="text-align:center"><button class="btn ghost" id="resetBtn">↻ 체크 내용 초기화</button></div>
-    <p class="quiet">입력한 내용은 이 기기의 브라우저에만 임시 저장됩니다.<br>운영자에게 전달하려면 ‘결과 공유하기’를 눌러주세요.</p>
+    <p class="quiet">새로고침하면 입력한 정보와 체크 내역이 모두 초기화됩니다.<br>운영자에게 전달하려면 ‘결과 공유하기’를 눌러주세요.</p>
     <div class="footer">MECONOMY · MY SOLO EXPERIENCE</div>
     <section aria-label="문자 발송 도구" style="margin:24px 0 0"><a href="./sms.html" style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#0c7b89;color:#fff;text-decoration:none;border-radius:15px;padding:15px 18px;font-size:15px;font-weight:850;box-shadow:0 8px 18px #0c7b8928"><span>✉️ 문자 보내기</span><span aria-hidden="true">→</span></a><p style="margin:7px 3px 0;font-size:12px;color:#527981;line-height:1.5">전화번호와 내용을 입력한 뒤 문자 앱에서 보낼 수 있어요.</p></section>
   </main>
@@ -89,12 +89,12 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-vis
 'use strict';
 const labels=['카페 가서 혼자 놀기','쇼핑 혼자 하기','코인노래방에서 혼자 노래하기','영화관 가서 혼자 영화 보기','여행 혼자 떠나기','술집에서 혼자 술 마시기','음악 페스티벌 혼자 가서 놀기','고깃집 가서 혼자 고기 구워 먹기','놀이공원 가서 혼자 놀기'];
 const $=id=>document.getElementById(id), checks=[...document.querySelectorAll('[data-level]')];
-const key='meconomy-solo-checklist-v1';let toastTimer;
+let toastTimer;
 function state(){return {name:$('name').value.trim(),age:$('age').value,mbti:$('mbti').value,levels:checks.filter(c=>c.checked).map(c=>Number(c.dataset.level)),none:$('none').checked,custom:$('custom').value.trim()};}
-function store(){try{localStorage.setItem(key,JSON.stringify(state()));}catch(_){}}
-function restore(){try{let s=JSON.parse(localStorage.getItem(key)||'null');if(!s||typeof s!=='object')return;$('name').value=s.name||'';$('age').value=s.age||'';$('mbti').value=s.mbti||'';$('custom').value=s.custom||'';checks.forEach(c=>c.checked=Array.isArray(s.levels)&&s.levels.includes(Number(c.dataset.level)));$('none').checked=!!s.none&&!checks.some(c=>c.checked);}catch(_){}}
-function render(){checks.forEach(c=>c.closest('.choice').classList.toggle('checked',c.checked));let n=checks.filter(c=>c.checked).length;let p=Math.round(n/9*100);$('progressCount').textContent=n+' / 9';$('progressFill').style.width=p+'%';$('progressBar').setAttribute('aria-valuenow',String(n));$('progressMessage').textContent=n===9?'와! 9가지 경험을 모두 해보셨네요! 🎉':n===0?'아직 체크한 경험이 없어요. 하나씩 골라보세요!':`총 ${n}개의 혼놀 경험을 체크했어요! (${p}%)`;store();}
-checks.forEach(c=>c.addEventListener('change',()=>{if(c.checked)$('none').checked=false;render();}));$('none').addEventListener('change',()=>{if($('none').checked)checks.forEach(c=>c.checked=false);render();});['name','age','mbti','custom'].forEach(id=>$(id).addEventListener('input',store));
+
+function clearForm(){['name','age','custom'].forEach(id=>$(id).value='');$('mbti').value='';$('none').checked=false;checks.forEach(c=>c.checked=false);$('modal').classList.remove('open');render();}
+function render(){checks.forEach(c=>c.closest('.choice').classList.toggle('checked',c.checked));let n=checks.filter(c=>c.checked).length;let p=Math.round(n/9*100);$('progressCount').textContent=n+' / 9';$('progressFill').style.width=p+'%';$('progressBar').setAttribute('aria-valuenow',String(n));$('progressMessage').textContent=n===9?'와! 9가지 경험을 모두 해보셨네요! 🎉':n===0?'아직 체크한 경험이 없어요. 하나씩 골라보세요!':`총 ${n}개의 혼놀 경험을 체크했어요! (${p}%)`;}
+checks.forEach(c=>c.addEventListener('change',()=>{if(c.checked)$('none').checked=false;render();}));$('none').addEventListener('change',()=>{if($('none').checked)checks.forEach(c=>c.checked=false);render();});
 function resultText(){let s=state();let lines=['🎈 MECONOMY 어디까지 해봤어?!','',`이름: ${s.name||'미입력'}   나이: ${s.age||'미입력'}   MBTI: ${s.mbti||'미입력'}`,'',`혼놀 경험: ${s.levels.length} / 9개`,''];for(let i=0;i<labels.length;i++)lines.push(`${s.levels.includes(i+1)?'☑':'☐'} Lv.${i+1} ${labels[i]}`);lines.push('',`아직 해본 게 없어요: ${s.none?'네':'아니요'}`,`나만의 혼놀 경험: ${s.custom||'없음'}`);return lines.join('\n');}
 function toast(msg){let t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2800);}
 function openModal(){let s=state();$('resultCount').textContent=s.levels.length+' / 9';$('resultSub').textContent=s.name?`${s.name}님의 혼놀 도전 기록`:'나의 혼놀 도전 기록';$('resultBody').textContent=resultText();$('modal').classList.add('open');$('closeBtn').focus();}
@@ -103,7 +103,7 @@ $('viewBtn').addEventListener('click',openModal);$('closeBtn').addEventListener(
 async function copyText(){let str=resultText();try{await navigator.clipboard.writeText(str);toast('결과가 복사되었어요!');}catch(e){let t=document.createElement('textarea');t.value=str;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();let ok=document.execCommand('copy');t.remove();toast(ok?'결과가 복사되었어요!':'복사할 수 없어요. 결과 화면을 길게 눌러 복사해 주세요.');}}
 async function share(){let str=resultText();if(navigator.share){try{await navigator.share({title:'Meconomy 혼놀 체크 결과',text:str});return;}catch(e){if(e.name==='AbortError')return;}}await copyText();}
 $('shareBtn').addEventListener('click',share);$('modalShareBtn').addEventListener('click',share);$('copyBtn').addEventListener('click',copyText);
-$('resetBtn').addEventListener('click',()=>{if(!confirm('입력한 정보와 체크 내용을 모두 초기화할까요?'))return;['name','age','custom'].forEach(id=>$(id).value='');$('mbti').value='';$('none').checked=false;checks.forEach(c=>c.checked=false);render();toast('초기화했어요.');window.scrollTo({top:0,behavior:'smooth'});});
+$('resetBtn').addEventListener('click',()=>{if(!confirm('입력한 정보와 체크 내용을 모두 초기화할까요?'))return;clearForm();toast('초기화했어요.');window.scrollTo({top:0,behavior:'smooth'});});
 function roundRect(ctx,x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
 function wrap(ctx,text,maxWidth){let lines=[],line='';for(let char of text){if(ctx.measureText(line+char).width>maxWidth&&line){lines.push(line);line=char;}else{line+=char;}}if(line)lines.push(line);return lines.length?lines:[''];}
 function createPng(){let s=state();const width=1080,pad=76,dy=66;let c=document.createElement('canvas');c.width=width;c.height=1740;let x=c.getContext('2d');const ff='"Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif';x.fillStyle='#f4fbfa';x.fillRect(0,0,width,c.height);roundRect(x,42,44,996,1650,34,'#ffffff');roundRect(x,42,44,996,15,8,'#42b7c5');x.fillStyle='#c65d1d';x.font=`900 63px ${ff}`;x.fillText('어디까지 해봤어?!',pad,158);x.fillStyle='#627f88';x.font=`500 28px ${ff}`;x.fillText('MECONOMY  ·  나의 혼놀 경험 체크 결과',pad,217);
@@ -114,7 +114,7 @@ y+=28;x.fillStyle='#234851';x.font=`700 30px ${ff}`;x.fillText(`아직 해본 �
 x.fillStyle='#93aeb3';x.font=`700 24px ${ff}`;x.fillText('make_it  ·  MECONOMY',pad,1660);return c;}
 function saveImage(){try{let c=createPng();let a=document.createElement('a');a.download='Meconomy_혼놀_체크결과.png';a.href=c.toDataURL('image/png');document.body.appendChild(a);a.click();a.remove();toast('결과 이미지가 저장되었어요!');}catch(e){toast('이 브라우저에서는 이미지 저장을 지원하지 않아요.');}}
 $('saveBtn').addEventListener('click',saveImage);$('modalSaveBtn').addEventListener('click',saveImage);
-restore();render();
+try{localStorage.removeItem('meconomy-solo-checklist-v1');}catch(_){} clearForm();window.addEventListener('pageshow',e=>{if(!e.persisted)clearForm();});
 })();
 </script>
 </body></html>
